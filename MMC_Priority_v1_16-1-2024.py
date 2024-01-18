@@ -1,10 +1,3 @@
-##nested_list = [[7, 8, 3], [10, 8, 2], [6, 5, 2], [10, 12, 1], [22, 10, 3]]
-##
-##sorted_list = sorted(nested_list, key=lambda x: x[2], reverse=True)
-##
-##print("Sorted list:", sorted_list)
-##
-##exit()
 #importing required libraries
 import math
 import pandas as pd
@@ -127,10 +120,10 @@ def MMC(lembda,meu,server_no):
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
-            if arrival[i]>=value[1][-1]: #11. 16>=16 and 16>=20
-                if len(value[3]) != 0: #S1:value[3]=[[1,7,5]] S2:value[3]=[[1,10,1]]
+            if arrival[i]>=value[1][-1]: #3.3>=5 and 3>=4
+                if len(value[3]) != 0: #S1:value[3]=[[1,6,2],[1,4,3]] S2:value[3]=[[]]
                     for k in range(len(value[3])):
-                        if arrival[i]>value[1][-1]: #16>16
+                        if arrival[i]>value[1][-1]: #13>16
                             value[0].append(value[1][-1]) 
                             curr_service=arrival[i]-value[1][-1] #curr_service=20-17=3
                             if curr_service> value[3][0][-1]: #3>2
@@ -148,36 +141,41 @@ def MMC(lembda,meu,server_no):
                 value[2].append(priority[i]) # value[2]=[]
                 value[4].append(s_no[i]) # value[4]= []
                 
-                if i==(len(arrival)-1): #S1:value[3]=[[1,7,5]] S2:value[3]=[[1,10,1]]
-                    for k in range(len(value[3])):
-                        if arrival[i]>value[1][-1]: #16>16
-                            value[0].append(value[1][-1]) 
-                            curr_service=arrival[i]-value[1][-1] #curr_service=20-17=3
-                            if curr_service> value[3][0][-1]: #3>2
-                                value[1].append(value[1][-1]+value[3][0][-1])
-                            elif curr_service <= value[3][0][-1]: #2<=2
-                                value[1].append(value[1][-1]+curr_service) 
-                            value[2].append(value[3][0][0])
-                            value[4].append(value[3][0][1])
-                            value[3].pop(0)
+                
                 break
             
-            all_curr_end_time.append(value[1][-1])  # all_curr_end_time=[16,20]
+            all_curr_end_time.append(value[1][-1])  # all_curr_end_time=[16,16]
             min_end=min(all_curr_end_time) #min_end=16
             
-            all_curr_priority.append(value[2][-1]) #all_curr_priority=[3,1]
-            min_priority=min(all_curr_priority) #min_priority=1
+            all_curr_priority.append(value[2][-1]) #all_curr_priority=[2,3]
+            min_priority=min(all_curr_priority) #min_priority=2
+        for key, value in Servers.items():
+            if i==(len(arrival)-1): #S1:value[3]=[[]] S2:value[3]=[[]]
+                for k in range(len(value[3])):
+                    if arrival[i]>value[1][-1]: #16>16
+                        value[0].append(value[1][-1]) 
+                        curr_service=arrival[i]-value[1][-1] #curr_service=20-17=3
+                        if curr_service> value[3][0][-1]: #3>2
+                            value[1].append(value[1][-1]+value[3][0][-1])
+                        elif curr_service <= value[3][0][-1]: #2<=2
+                            value[1].append(value[1][-1]+curr_service) 
+                        value[2].append(value[3][0][0])
+                        value[4].append(value[3][0][1])
+                        value[3].pop(0)
+
+
         all_curr_end_time.clear()
         all_curr_priority.clear()
         
         if i>C_count:   
-            C_count=C_count+1    #C_count=10
+            C_count=C_count+1    #C_count=3
             #Case when the minimum priority of the customer being last in server queue is greater than the priority of customer just arrived 
-            if min_priority>priority[i]:    #1>1
+            if min_priority>priority[i]:    #2>2
                 for key,value in Servers.items():
                     if min_priority>priority[i]: 
                         end_now.append(value[1][-1]) #end_now=[]             
-                        min_prior_end_time=min(end_now) #min_prior_end_time=  
+                        min_prior_end_time=min(end_now) #min_prior_end_time=
+                end_now.clear()
                         
                 for key,value in Servers.items():
                     if min_prior_end_time==value[1][-1] and min_priority>priority[i]: 
@@ -193,25 +191,21 @@ def MMC(lembda,meu,server_no):
                                 value[0].append(curr_end)
                                 value[1].append(curr_end+value[3][j][2])
                                 curr_end=curr_end+value[3][j][2]
-                        #cust_serv_no.append(key)                         #cust_serv_no=[]
-                        #value[0].append(min_prior_end_time)              #value[0]=[]
-                        #value[1].append(min_prior_end_time + service[i]) #value[1]=[]
-                        #value[2].append(priority[i])                     #value[2]=[]
-                        #value[4].append(s_no[i])                         #value[4]=[]
                         break
                     
             #Case when the minimum priority of the customer being last in server queue is equal to the priority of customer just arrived        
-            if min_priority==priority[i]: #1==1
+            if min_priority==priority[i]: #2==2
                 for key,value in Servers.items():
-                    if min_priority==priority[i]: #1==1
-                        end_now.append(value[1][-1])  #end_now=[20]
-                        min_prior_end_time=min(end_now) #min_prior_end_time=20
+                    if min_priority==priority[i]: #2==2
+                        end_now.append(value[1][-1])  #end_now=[4]
+                        min_prior_end_time=min(end_now) #min_prior_end_time=4
+                end_now.clear()
                         
                 for key,value in Servers.items(): 
-                    if min_prior_end_time==value[1][-1] and min_priority==priority[i]: #20==20 and 1==1        
-                        if min_prior_end_time>arrival[i]: #20>15
-                            value[3].append([priority[i],s_no[i],service[i]]) #S1:value[3]=[[1,10,1],[1,7,5]]
-                            value[3].sort(key= lambda x: x[0],reverse=True) #S1:value[3]=[[]]
+                    if min_prior_end_time==value[1][-1] and min_priority==priority[i]: #4==4 and 2==2        
+                        if min_prior_end_time>arrival[i]: #4>3
+                            value[3].append([priority[i],s_no[i],service[i]]) #S1:value[3]=[[1,6,2],[]]
+                            value[3].sort(key= lambda x: x[0],reverse=True) #S1:value[3]=[[1,6,2]]
                         if min_prior_end_time<=arrival[i] or i==(len(arrival)-1):
                             curr_end=min_prior_end_time
                             for j in range(len(value[3])):
@@ -221,27 +215,23 @@ def MMC(lembda,meu,server_no):
                                 value[0].append(curr_end)
                                 value[1].append(curr_end+value[3][j][2])
                                 curr_end=curr_end+value[3][j][2]
-                        
-                        cust_serv_no.append(key) #cust_serv_no=[]
-                        #value[0].append(min_prior_end_time) #value[0]=[]
-                        #value[1].append(min_prior_end_time + service[i]) #value[1]=[]
-                        #value[2].append(priority[i]) #value[2]=[]
-                        #value[4].append(s_no[i])#value[4]=[]
+
                         break
 
             #Case when the minimum priority of the customer being last in server queue is less than the priority of customer just arrived
             if min_priority<priority[i]: #1<3
                 for key,value in Servers.items():
                     if min_priority<priority[i]: #1<3
-                        end_now.append(value[1][-1]) #end_now=[20,20]
-                        min_prior_end_time=min(end_now)#min_prior_end_time=20
+                        end_now.append(value[1][-1]) #end_now=[7,3]
+                        min_prior_end_time=min(end_now)#min_prior_end_time=3
+                end_now.clear()
 
                 for key,value in Servers.items():
-                    if min_prior_end_time==value[1][-1] and min_priority<priority[i]: #20==20 and 1<3
-                        if min_prior_end_time>arrival[i]: #20>15
-                            service_left = value[1][-1] - arrival[i]  #service_left=5
-                            value[3].append([value[2][-1],value[4][-1],service_left]) #value[3]=[[1,7,5]]
-                            value[3].sort(key= lambda x: x[0],reverse=True) #value[3]=[[1,7,5]]
+                    if min_prior_end_time==value[1][-1] and min_priority<priority[i]: #3==3 and 1<3
+                        if min_prior_end_time>arrival[i]: #3>2
+                            service_left = value[1][-1] - arrival[i]  #service_left=1
+                            value[3].append([value[2][-1],value[4][-1],service_left]) #value[3]=[[1,2,1]]
+                            value[3].sort(key= lambda x: x[0],reverse=True) #value[3]=[[1,2,1]]
                         if min_prior_end_time<=arrival[i] or i==(len(arrival)-1): 
                             curr_end=min_prior_end_time
                             for j in range(len(value[3])):
@@ -253,12 +243,18 @@ def MMC(lembda,meu,server_no):
                                 curr_end=curr_end+value[3][j][2]
 
                         cust_serv_no.append(key)                  #cust_serv_no=[1]
-                        value[0].append(arrival[i])               # value[0]=[15]
-                        value[1].pop(-1)
-                        value[1].append(arrival[i])
+                        if arrival[i]<=value[0][-1]:
+                            value[0].pop(-1)
+                            value[1].pop(-1)
+                            value[2].pop(-1)
+                            value[4].pop(-1)
+                        else:
+                            value[1].pop(-1)
+                            value[1].append(arrival[i])
+                        value[0].append(arrival[i])               # value[0]=[13]
                         value[1].append(arrival[i]+service[i])    # value[1]=[16]
-                        value[2].append(priority[i])              # value[2]=[3]
-                        value[4].append(s_no[i])                  # value[4]=[9]
+                        value[2].append(priority[i])              # value[2]=[2]
+                        value[4].append(s_no[i])                  # value[4]=[7]
                         break
 
             
