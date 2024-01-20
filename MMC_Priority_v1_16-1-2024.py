@@ -75,6 +75,8 @@ def MMC(lembda,meu,server_no):
     C_count=-1
     global min_end
     global min_priority
+    global service_remain
+    service_remain=0
     
     #Generating values for serial number, cummulative probability and cummulative probability lookup
     x=0
@@ -117,27 +119,35 @@ def MMC(lembda,meu,server_no):
     for i in range(1,server_no+1):
         Servers[i]=[[0],[0],[0],[],[]]
     
-    service=[2, 1, 5, 4, 2, 3, 8, 1, 1, 3, 2, 2]
-    arrival=[0, 4, 5, 6, 7, 8, 8, 11, 12, 13, 16, 17]
-    priority=[1, 1, 1, 3, 2, 3, 3, 2, 2, 3, 2, 1]
+    #service=[2, 10, 4, 4, 3, 9, 5, 1, 1, 1, 2, 3]
+    #arrival=[0, 1, 1, 2, 6, 7, 10, 12, 13, 17, 17, 18]
+    #priority=[2, 2, 1, 3, 2, 3, 3, 2, 3, 3, 2, 3]
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
             if len(value[3]) != 0: #S1:value[3]=[[1,6,2],[1,4,3]] S2:value[3]=[[]]
-                    for k in range(len(value[3])):
-                        if arrival[i]>value[1][-1]: #13>16
-                            if priority[i]<value[3][0][0]:
-                                value[0].append(value[1][-1])
-                                value[1].append(value[1][-1]+value[3][0][-1])
-                            else:
-                                curr_service=arrival[i]-value[1][-1] #curr_service=17-10=7
-                                if curr_service> value[3][0][-1]: #3>2
-                                    value[1].append(value[1][-1]+value[3][0][-1])
-                                elif curr_service <= value[3][0][-1]: #2<=2
-                                    value[1].append(value[1][-1]+curr_service) 
-                            value[2].append(value[3][0][0])
-                            value[4].append(value[3][0][1])
-                            value[3].pop(0)
+                        for k in range(len(value[3])):
+                            if arrival[i]>value[1][-1]: #13>16
+                                    if priority[i]<=value[3][0][0]:
+                                        value[0].append(value[1][-1])
+                                        value[1].append(value[1][-1]+value[3][0][-1])
+                                    else:
+                                        curr_service=arrival[i]-value[1][-1] #curr_service=17-10=7
+                                        
+                                        value[0].append(value[1][-1])
+                                        if curr_service> value[3][0][-1]: #3>2
+                                            value[1].append(value[1][-1]+value[3][0][-1])
+                                        elif curr_service <= value[3][0][-1]: #2<=2
+                                            service_remain=value[3][0][-1]-curr_service
+                                            value[1].append(value[1][-1]+curr_service)
+                                    value[2].append(value[3][0][0])
+                                    value[4].append(value[3][0][1])
+                                    if service_remain>0:
+                                        value[3][0][2]=service_remain
+                                        service_remain=0
+                                    else:
+                                        value[3].pop(0)
+        for key, value in Servers.items():
             if arrival[i]>=value[1][-1]: #3.3>=5 and 3>=4
                 
 
@@ -159,16 +169,15 @@ def MMC(lembda,meu,server_no):
         for key, value in Servers.items():
             if i==(len(arrival)-1): #S1:value[3]=[[]] S2:value[3]=[[]]
                 for k in range(len(value[3])):
-                    if arrival[i]>value[1][-1]: #16>16
-                        value[0].append(value[1][-1]) 
-                        curr_service=arrival[i]-value[1][-1] #curr_service=20-17=3
-                        if curr_service> value[3][0][-1]: #3>2
-                            value[1].append(value[1][-1]+value[3][0][-1])
-                        elif curr_service <= value[3][0][-1]: #2<=2
-                            value[1].append(value[1][-1]+curr_service) 
-                        value[2].append(value[3][0][0])
-                        value[4].append(value[3][0][1])
-                        value[3].pop(0)
+                    value[0].append(value[1][-1]) 
+                    #curr_service=arrival[i]-value[1][-1] #curr_service=20-17=3
+                    #if curr_service> value[3][0][-1]: #3>2
+                    value[1].append(value[1][-1]+value[3][0][-1])
+                    #elif curr_service <= value[3][0][-1]: #2<=2
+                    #    value[1].append(value[1][-1]+curr_service) 
+                    value[2].append(value[3][0][0])
+                    value[4].append(value[3][0][1])
+                    value[3].pop(0)
 
 
         all_curr_end_time.clear()
