@@ -1,3 +1,33 @@
+def uniform_pdf(x, a, b):
+    """
+    Probability Density Function (PDF) of a uniform distribution.
+
+    Parameters:
+    - x: The value at which to evaluate the PDF.
+    - a: Lower bound of the distribution.
+    - b: Upper bound of the distribution.
+
+    Returns:
+    - PDF value at the given point x.
+    """
+    if a <= x <= b:
+        return 1 / (b - a)
+    else:
+        return 0
+
+# Example usage:
+a = 2
+b = 8
+
+# Evaluate PDF at a few points
+x_values = [3, 5, 7, 10]
+pdf_values = [uniform_pdf(x, a, b) for x in x_values]
+
+# Print the results
+for x, pdf in zip(x_values, pdf_values):
+    print(f'PDF at x={x} : {pdf}')
+
+exit()
 #importing required libraries
 import math
 import pandas as pd
@@ -52,6 +82,23 @@ def ServerUtilization(Server_util):
 
     plt.pie(y, labels = mylabels,autopct='%1.1f%%')
     plt.show() 
+
+def uniform_pdf(x, a, b):
+    """
+    Probability Density Function (PDF) of a uniform distribution.
+
+    Parameters:
+    - x: The value at which to evaluate the PDF.
+    - a: Lower bound of the distribution.
+    - b: Upper bound of the distribution.
+
+    Returns:
+    - PDF value at the given point x.
+    """
+    if a <= x <= b:
+        return 1 / (b - a)
+    else:
+        return 0
 
 def GGC(lembda,meu,sigma,server_no):
     #initializing required lists
