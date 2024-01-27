@@ -167,5 +167,5 @@ def MMC(lembda,meu,server_no):
     return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
 
 #testing
-MMC(10,75,10)
+MMC(1.58,2.5,1)
                 

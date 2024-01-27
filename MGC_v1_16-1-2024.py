@@ -3,7 +3,7 @@ import math
 import pandas as pd
 import random
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import gengamma
 import matplotlib.pyplot as plt
 
 #Graph plot Section
@@ -53,8 +53,7 @@ def ServerUtilization(Server_util):
     plt.pie(y, labels = mylabels,autopct='%1.1f%%')
     plt.show() 
 
-def MGC(lembda,meuMin,meuMax,server_no):
-    meu=(meuMin+meuMax)/2
+def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale parameter of distribution, p=Shape-scaling parameter of distribution
     #initializing required lists
     s_no=[]
     cp=[]
@@ -97,8 +96,9 @@ def MGC(lembda,meuMin,meuMax,server_no):
     int_arrival.pop(-1)
 
     #Generating values for service time
-    for i in range(len(cp)):
-        service.append(math.ceil(-meu*math.log(random.uniform(0,1))))
+    service_gamma = gengamma.rvs(a, d, scale=p, size=len(cp))
+    for i in range(len(service_gamma)):
+        service.append(math.ceil(service_gamma[i]))
 
     #Initializing Servers
     S=[]
@@ -142,6 +142,7 @@ def MGC(lembda,meuMin,meuMax,server_no):
         RT.append(S[i]-arrival[i])
 
     #Server utilization calculation
+    meu=a/d
     if lembda>=meu:
         Server_util=meu/lembda
     elif meu>=lembda:
@@ -168,5 +169,5 @@ def MGC(lembda,meuMin,meuMax,server_no):
     return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
 
 #testing
-MGC(10,50,75,10)
+MGC(1.58,2.5,1.0,0.8,1)
                 
