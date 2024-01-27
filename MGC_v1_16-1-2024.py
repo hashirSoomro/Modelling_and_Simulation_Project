@@ -170,4 +170,3 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
 
 #testing
 MGC(1.58,2.5,1.0,0.8,1)
-                

@@ -44,14 +44,17 @@ def entVsService(s_no,service):
     plt.tight_layout()
     plt.show()
     return s_no,service
-def ServerUtilization(Server_util):
-    idleTime=1-Server_util
-    #print(idleTime,Server_util)
-    y = np.array([Server_util,idleTime])
-    mylabels = ["Utilized Server", "Idle time"]
 
-    plt.pie(y, labels = mylabels,autopct='%1.1f%%')
-    plt.show() 
+def ServerUtilization(server_info):
+    for i in range(len(server_info)):
+        idleTime=server_info[i][0]/server_info[i][1]
+        server_util=1-idleTime
+        print(idleTime,server_util)
+        y = np.array([server_util,idleTime])
+        mylabels = ["Utilized Server", "Idle time"]
+
+        plt.pie(y, labels = mylabels,autopct='%1.1f%%')
+        plt.show() 
 
 def MMC(lembda,meu,server_no):
     #initializing required lists
@@ -66,6 +69,7 @@ def MMC(lembda,meu,server_no):
     RT=[]
     cust_serv_no=[]
     all_curr_end_time=[]
+    server_info=[]
     value=0
     C_count=-1
     global min_end
@@ -134,17 +138,34 @@ def MMC(lembda,meu,server_no):
                     E.append(min_end+service[i])
                     break
 
+    for key, value in Servers.items():
+        value[0].pop(0)
+        value[1].pop(0)
+
+
+    #Server Utilization    
+    for key,value in Servers.items():
+        idle_time=value[0][0]
+        for i in range(len(value[0])-1):
+
+            if value[1][i]<value[0][i+1]:
+                idle_now=value[0][i+1]-value[1][i]
+                idle_time=idle_time+idle_now
+        server_info.append([idle_time,value[1][-1],key])
+    print(server_info)
+
+    
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
 
-    #Server utilization calculation
-    if lembda>=meu:
-        Server_util=meu/lembda
-    elif meu>=lembda:
-        Server_util=lembda/meu
+##    #Server utilization calculation
+##    if lembda>=meu:
+##        Server_util=meu/lembda
+##    elif meu>=lembda:
+##        Server_util=lembda/meu
 
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -164,8 +185,8 @@ def MMC(lembda,meu,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
+    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(server_info),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
 
 #testing
-MMC(1.58,2.5,1)
+MMC(1.58,2.5,2)
                 
