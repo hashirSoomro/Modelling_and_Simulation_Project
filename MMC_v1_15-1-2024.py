@@ -7,6 +7,21 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 #Graph plot Section
+def GanttChart(Servers):
+    for key, value in Servers.items():
+        # Create a Gantt chart using Matplotlib
+        fig, ax = plt.subplots()
+        for i, customer in enumerate(value[2]):
+            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
+
+        # Beautify the plot
+        plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+        plt.yticks(value[2])  # Set y-axis ticks to customer IDs
+        plt.xlabel('Time')
+        plt.ylabel('Customer ID')
+        plt.title('Gantt Chart for Server '+f"{key}")
+        plt.show()
+
 def entVsWT(s_no,WT):
     plt.bar(s_no, WT, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -49,11 +64,11 @@ def ServerUtilization(server_info):
     for i in range(len(server_info)):
         idleTime=server_info[i][0]/server_info[i][1]
         server_util=1-idleTime
-        print(idleTime,server_util)
         y = np.array([server_util,idleTime])
         mylabels = ["Utilized Server", "Idle time"]
 
         plt.pie(y, labels = mylabels,autopct='%1.1f%%')
+        plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
         plt.show() 
 
 def MMC(lembda,meu,server_no):
@@ -108,7 +123,7 @@ def MMC(lembda,meu,server_no):
     E=[]
     Servers={}
     for i in range(1,server_no+1):
-        Servers[i]=[[0],[0]]
+        Servers[i]=[[0],[0],[]]
     
     #Assigning customers to server
     for i in range(len(arrival)):
@@ -116,6 +131,7 @@ def MMC(lembda,meu,server_no):
             if arrival[i]>=value[1][-1]:
                 C_count=C_count+1
                 cust_serv_no.append(key)
+                value[2].append(i+1)
                 value[0].append(arrival[i])
                 S.append(arrival[i])
                 value[1].append(arrival[i]+service[i])
@@ -132,6 +148,7 @@ def MMC(lembda,meu,server_no):
             for key, value in Servers.items():
                 if value[1][-1]==min_end:
                     cust_serv_no.append(key)
+                    value[2].append(i+1)
                     value[0].append(min_end)
                     S.append(min_end)
                     value[1].append(min_end+service[i])
@@ -142,7 +159,6 @@ def MMC(lembda,meu,server_no):
         value[0].pop(0)
         value[1].pop(0)
 
-
     #Server Utilization    
     for key,value in Servers.items():
         idle_time=value[0][0]
@@ -152,20 +168,12 @@ def MMC(lembda,meu,server_no):
                 idle_now=value[0][i+1]-value[1][i]
                 idle_time=idle_time+idle_now
         server_info.append([idle_time,value[1][-1],key])
-    print(server_info)
-
     
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
-
-##    #Server utilization calculation
-##    if lembda>=meu:
-##        Server_util=meu/lembda
-##    elif meu>=lembda:
-##        Server_util=lembda/meu
 
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -185,7 +193,7 @@ def MMC(lembda,meu,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(server_info),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
+    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
 
 #testing
 MMC(1.58,2.5,2)
