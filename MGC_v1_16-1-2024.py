@@ -15,7 +15,10 @@ def GanttChart(Servers):
             ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
 
         # Beautify the plot
-        plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+        if value[1]==[]:
+            plt.xticks(range(0, 10))
+        else:
+            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
         plt.yticks(value[2])  # Set y-axis ticks to customer IDs
         plt.xlabel('Time')
         plt.ylabel('Customer ID')
@@ -155,21 +158,31 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
-
+    
+    all_last_end=[]
     for key, value in Servers.items():
         value[0].pop(0)
         value[1].pop(0)
-
+        if value[1]==[]:
+            pass
+        else:
+            all_last_end.append(value[1][-1])
+    max_end=max(all_last_end)
+    
     #Server Utilization    
     for key,value in Servers.items():
-        idle_time=value[0][0]
-        for i in range(len(value[0])-1):
+        if value[0] == []:
+            idle_time=max_end
+            server_info.append([max_end,max_end,key])
+        else:
+            idle_time=value[0][0]
+            for i in range(len(value[0])-1):
 
-            if value[1][i]<value[0][i+1]:
-                idle_now=value[0][i+1]-value[1][i]
-                idle_time=idle_time+idle_now
-        server_info.append([idle_time,value[1][-1],key])
-    
+                if value[1][i]<value[0][i+1]:
+                    idle_now=value[0][i+1]-value[1][i]
+                    idle_time=idle_time+idle_now
+            server_info.append([idle_time,max_end,key])
+
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
@@ -197,4 +210,4 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
     return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
 
 #testing
-MGC(1.58,2.5,1.0,0.8,1)
+MGC(1.58,2.5,1.0,0.8,10)

@@ -7,6 +7,24 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 #Graph plot Section
+def GanttChart(Servers):
+    for key, value in Servers.items():
+        # Create a Gantt chart using Matplotlib
+        fig, ax = plt.subplots()
+        for i, customer in enumerate(value[2]):
+            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
+
+        # Beautify the plot
+        if value[1]==[]:
+            plt.xticks(range(0, 10))
+        else:
+            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+        plt.yticks(value[2])  # Set y-axis ticks to customer IDs
+        plt.xlabel('Time')
+        plt.ylabel('Customer ID')
+        plt.title('Gantt Chart for Server '+f"{key}")
+        plt.show()
+
 def entVsWT(s_no,WT):
     plt.bar(s_no, WT, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -44,14 +62,17 @@ def entVsService(s_no,service):
     plt.tight_layout()
     plt.show()
     return s_no,service
-def ServerUtilization(Server_util):
-    idleTime=1-Server_util
-    #print(idleTime,Server_util)
-    y = np.array([Server_util,idleTime])
-    mylabels = ["Utilized Server", "Idle time"]
 
-    plt.pie(y, labels = mylabels,autopct='%1.1f%%')
-    plt.show() 
+def ServerUtilization(server_info):
+    for i in range(len(server_info)):
+        idleTime=server_info[i][0]/server_info[i][1]
+        server_util=1-idleTime
+        y = np.array([server_util,idleTime])
+        mylabels = ["Utilized Server", "Idle time"]
+
+        plt.pie(y, labels = mylabels,autopct='%1.1f%%')
+        plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
+        plt.show() 
 
 def GMC(lembda,meu,sigma,server_no):
     #initializing required lists
@@ -66,6 +87,7 @@ def GMC(lembda,meu,sigma,server_no):
     RT=[]
     cust_serv_no=[]
     all_curr_end_time=[]
+    server_info=[]
     value=0
     C_count=-1
     global min_end
@@ -105,14 +127,15 @@ def GMC(lembda,meu,sigma,server_no):
     E=[]
     Servers={}
     for i in range(1,server_no+1):
-        Servers[i]=[[0],[0]]
-    
+        Servers[i]=[[0],[0],[]]
+
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
             if arrival[i]>=value[1][-1]:
                 C_count=C_count+1
                 cust_serv_no.append(key)
+                value[2].append(i+1)
                 value[0].append(arrival[i])
                 S.append(arrival[i])
                 value[1].append(arrival[i]+service[i])
@@ -120,32 +143,49 @@ def GMC(lembda,meu,sigma,server_no):
                 break
             all_curr_end_time.append(value[1][-1])
             min_end=min(all_curr_end_time)
-            #print(min_end)
             
         all_curr_end_time.clear()
-        #print(min_end)
         if i>C_count:
             C_count=C_count+1
             for key, value in Servers.items():
                 if value[1][-1]==min_end:
                     cust_serv_no.append(key)
+                    value[2].append(i+1)
                     value[0].append(min_end)
                     S.append(min_end)
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
 
+    all_last_end=[]
+    for key, value in Servers.items():
+        value[0].pop(0)
+        value[1].pop(0)
+        if value[1]==[]:
+            pass
+        else:
+            all_last_end.append(value[1][-1])
+    max_end=max(all_last_end)
+
+    #Server Utilization    
+    for key,value in Servers.items():
+        if value[0] == []:
+            idle_time=max_end
+            server_info.append([max_end,max_end,key])
+        else:
+            idle_time=value[0][0]
+            for i in range(len(value[0])-1):
+
+                if value[1][i]<value[0][i+1]:
+                    idle_now=value[0][i+1]-value[1][i]
+                    idle_time=idle_time+idle_now
+            server_info.append([idle_time,max_end,key])
+
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
-
-    #Server utilization calculation
-    if lembda>=meu:
-        Server_util=meu/lembda
-    elif meu>=lembda:
-        Server_util=lembda/meu
 
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -165,8 +205,8 @@ def GMC(lembda,meu,sigma,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
+    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
 
 #testing
-GMC(10,8,5,10)
+GMC(1.58,0.9,0.4,10)
                 

@@ -1,42 +1,31 @@
-def uniform_pdf(x, a, b):
-    """
-    Probability Density Function (PDF) of a uniform distribution.
-
-    Parameters:
-    - x: The value at which to evaluate the PDF.
-    - a: Lower bound of the distribution.
-    - b: Upper bound of the distribution.
-
-    Returns:
-    - PDF value at the given point x.
-    """
-    if a <= x <= b:
-        return 1 / (b - a)
-    else:
-        return 0
-
-# Example usage:
-a = 2
-b = 8
-
-# Evaluate PDF at a few points
-x_values = [3, 5, 7, 10]
-pdf_values = [uniform_pdf(x, a, b) for x in x_values]
-
-# Print the results
-for x, pdf in zip(x_values, pdf_values):
-    print(f'PDF at x={x} : {pdf}')
-
-exit()
 #importing required libraries
 import math
 import pandas as pd
 import random
 import numpy as np
+from scipy.stats import gengamma
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 #Graph plot Section
+def GanttChart(Servers):
+    for key, value in Servers.items():
+        # Create a Gantt chart using Matplotlib
+        fig, ax = plt.subplots()
+        for i, customer in enumerate(value[2]):
+            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
+
+        # Beautify the plot
+        if value[1]==[]:
+            plt.xticks(range(0, 10))
+        else:
+            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+        plt.yticks(value[2])  # Set y-axis ticks to customer IDs
+        plt.xlabel('Time')
+        plt.ylabel('Customer ID')
+        plt.title('Gantt Chart for Server '+f"{key}")
+        plt.show()
+
 def entVsWT(s_no,WT):
     plt.bar(s_no, WT, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -74,33 +63,19 @@ def entVsService(s_no,service):
     plt.tight_layout()
     plt.show()
     return s_no,service
-def ServerUtilization(Server_util):
-    idleTime=1-Server_util
-    #print(idleTime,Server_util)
-    y = np.array([Server_util,idleTime])
-    mylabels = ["Utilized Server", "Idle time"]
 
-    plt.pie(y, labels = mylabels,autopct='%1.1f%%')
-    plt.show() 
+def ServerUtilization(server_info):
+    for i in range(len(server_info)):
+        idleTime=server_info[i][0]/server_info[i][1]
+        server_util=1-idleTime
+        y = np.array([server_util,idleTime])
+        mylabels = ["Utilized Server", "Idle time"]
 
-def uniform_pdf(x, a, b):
-    """
-    Probability Density Function (PDF) of a uniform distribution.
+        plt.pie(y, labels = mylabels,autopct='%1.1f%%')
+        plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
+        plt.show()
 
-    Parameters:
-    - x: The value at which to evaluate the PDF.
-    - a: Lower bound of the distribution.
-    - b: Upper bound of the distribution.
-
-    Returns:
-    - PDF value at the given point x.
-    """
-    if a <= x <= b:
-        return 1 / (b - a)
-    else:
-        return 0
-
-def GGC(lembda,meu,sigma,server_no):
+def GGC(meu,a,d,p,sigma,server_no): # a=Shape parameter of distribution, d=Scale parameter of distribution, p=Shape-scaling parameter of distribution
     #initializing required lists
     s_no=[]
     cp=[]
@@ -113,6 +88,7 @@ def GGC(lembda,meu,sigma,server_no):
     RT=[]
     cust_serv_no=[]
     all_curr_end_time=[]
+    server_info=[]
     value=0
     C_count=-1
     global min_end
@@ -120,7 +96,6 @@ def GGC(lembda,meu,sigma,server_no):
     #Generating values for serial number, cummulative probability and cummulative probability lookup
     x=0
     while cpl[-1]<1:
-    #for x in range(0,ran_no):
         s_no.append(x)
         value=norm.cdf(x, meu, sigma)
         cp.append(float("%.6f"%value))
@@ -144,15 +119,16 @@ def GGC(lembda,meu,sigma,server_no):
     int_arrival.pop(-1)
 
     #Generating values for service time
-    for i in range(len(cp)):
-        service.append(math.ceil(-meu*math.log(random.uniform(0,1))))
+    service_gamma = gengamma.rvs(a, d, scale=p, size=len(cp))
+    for i in range(len(service_gamma)):
+        service.append(math.ceil(service_gamma[i]))
 
     #Initializing Servers
     S=[]
     E=[]
     Servers={}
     for i in range(1,server_no+1):
-        Servers[i]=[[0],[0]]
+        Servers[i]=[[0],[0],[]]
     
     #Assigning customers to server
     for i in range(len(arrival)):
@@ -160,6 +136,7 @@ def GGC(lembda,meu,sigma,server_no):
             if arrival[i]>=value[1][-1]:
                 C_count=C_count+1
                 cust_serv_no.append(key)
+                value[2].append(i+1)
                 value[0].append(arrival[i])
                 S.append(arrival[i])
                 value[1].append(arrival[i]+service[i])
@@ -176,23 +153,42 @@ def GGC(lembda,meu,sigma,server_no):
             for key, value in Servers.items():
                 if value[1][-1]==min_end:
                     cust_serv_no.append(key)
+                    value[2].append(i+1)
                     value[0].append(min_end)
                     S.append(min_end)
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
+    
+    all_last_end=[]
+    for key, value in Servers.items():
+        value[0].pop(0)
+        value[1].pop(0)
+        if value[1]==[]:
+            pass
+        else:
+            all_last_end.append(value[1][-1])
+    max_end=max(all_last_end)
+    
+    #Server Utilization    
+    for key,value in Servers.items():
+        if value[0] == []:
+            idle_time=max_end
+            server_info.append([max_end,max_end,key])
+        else:
+            idle_time=value[0][0]
+            for i in range(len(value[0])-1):
+
+                if value[1][i]<value[0][i+1]:
+                    idle_now=value[0][i+1]-value[1][i]
+                    idle_time=idle_time+idle_now
+            server_info.append([idle_time,max_end,key])
 
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
-
-    #Server utilization calculation
-    if lembda>=meu:
-        Server_util=meu/lembda
-    elif meu>=lembda:
-        Server_util=lembda/meu
 
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -212,8 +208,8 @@ def GGC(lembda,meu,sigma,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
+    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
 
 #testing
-GGC(10,8,5,10)
+GGC(1.58,2.5,1.0,0.8,5,10)
                 
