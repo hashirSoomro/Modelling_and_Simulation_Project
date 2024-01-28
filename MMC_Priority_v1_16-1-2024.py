@@ -7,6 +7,24 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 
 #Graph plot Section
+def GanttChart(Servers):
+    for key, value in Servers.items():
+        # Create a Gantt chart using Matplotlib
+        fig, ax = plt.subplots()
+        for i, customer in enumerate(value[4]):
+            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
+
+        # Beautify the plot
+        if value[1]==[]:
+            plt.xticks(range(0, 10))
+        else:
+            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+        plt.yticks(value[4])  # Set y-axis ticks to customer IDs
+        plt.xlabel('Time')
+        plt.ylabel('Customer ID')
+        plt.title('Gantt Chart for Server '+f"{key}")
+        plt.show()
+
 def entVsWT(s_no,WT):
     plt.bar(s_no, WT, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -44,14 +62,17 @@ def entVsService(s_no,service):
     plt.tight_layout()
     plt.show()
     return s_no,service
-def ServerUtilization(Server_util):
-    idleTime=1-Server_util
-    #print(idleTime,Server_util)
-    y = np.array([Server_util,idleTime])
-    mylabels = ["Utilized Server", "Idle time"]
 
-    plt.pie(y, labels = mylabels,autopct='%1.1f%%')
-    plt.show() 
+def ServerUtilization(server_info):
+    for i in range(len(server_info)):
+        idleTime=server_info[i][0]/server_info[i][1]
+        server_util=1-idleTime
+        y = np.array([server_util,idleTime])
+        mylabels = ["Utilized Server", "Idle time"]
+
+        plt.pie(y, labels = mylabels,autopct='%1.1f%%')
+        plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
+        plt.show() 
 
 def MMC(lembda,meu,server_no):
     #initializing required lists
@@ -70,7 +91,7 @@ def MMC(lembda,meu,server_no):
     all_curr_priority=[]
     end_now=[]
     pending=[]
-    
+    server_info=[]
     value=0
     C_count=-1
     global min_end
@@ -118,10 +139,7 @@ def MMC(lembda,meu,server_no):
     Servers={}
     for i in range(1,server_no+1):
         Servers[i]=[[0],[0],[0],[],[]]
-    
-    #service=[2, 10, 4, 4, 3, 9, 5, 1, 1, 1, 2, 3]
-    #arrival=[0, 1, 1, 2, 6, 7, 10, 12, 13, 17, 17, 18]
-    #priority=[2, 2, 1, 3, 2, 3, 3, 2, 3, 3, 2, 3]
+
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
@@ -150,7 +168,6 @@ def MMC(lembda,meu,server_no):
         for key, value in Servers.items():
             if arrival[i]>=value[1][-1]: #3.3>=5 and 3>=4
                 
-
                 C_count=C_count+1   #C_count=11
                 cust_serv_no.append(key) #cust_serv_no=[]
                 value[0].append(arrival[i]) #value[0]=[]
@@ -276,32 +293,66 @@ def MMC(lembda,meu,server_no):
                         value[4].append(s_no[i])                  # value[4]=[7]
                         break
 
-            
+##    print("Service=",service)
+##    print("Arrival=",arrival)
+##    print("Priority=",priority)
 
-    print("Service=",service)
-    print("Arrival=",arrival)
-    print("Priority=",priority)
-    print("Start=",S)
-    print("End=",E)
+    all_last_end=[]
     for key, value in Servers.items():
         value[0].pop(0)
         value[1].pop(0)
         value[2].pop(0)
-    for key, value in Servers.items():
-        print(f"Server: {key}")
-        for nested in value:
-            print(" ",nested)
+        if value[1]==[]:
+            pass
+        else:
+            all_last_end.append(value[1][-1])
+    max_end=max(all_last_end)
+    
+    #Server Utilization    
+    for key,value in Servers.items():
+        if value[0] == []:
+            idle_time=max_end
+            server_info.append([max_end,max_end,key])
+        else:
+            idle_time=value[0][0]
+            for i in range(len(value[0])-1):
+
+                if value[1][i]<value[0][i+1]:
+                    idle_now=value[0][i+1]-value[1][i]
+                    idle_time=idle_time+idle_now
+            server_info.append([idle_time,max_end,key])
+        
+##    for key, value in Servers.items():
+##        print(f"Server: {key}")
+##        for nested in value:
+##            print(" ",nested)
+
+    cust_serv_no.clear()
+    #Making start and end times list from servers
+    end_no=0
+    for j in range(len(s_no)):
+        for key,value in Servers.items():
+            for i in range(len(value[0])):
+                if value[4][i]==end_no:
+                    S.append(value[0][i])
+                    cust_serv_no.append(key)
+                    break
+
+            for k in range((len(value[0])-1),-1,-1):
+                if value[4][k]==end_no:
+                    E.append(value[1][k])
+                    break
+        end_no=end_no+1
+
+##    print("Start=",S)
+##    print("End=",E)
+            
+    
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
-
-    #Server utilization calculation
-    if lembda>=meu:
-        Server_util=meu/lembda
-    elif meu>=lembda:
-        Server_util=lembda/meu
 
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -321,7 +372,7 @@ def MMC(lembda,meu,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),ServerUtilization(Server_util),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT)        
+    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
 
 #testing
 MMC(1.58,2.58,2)
