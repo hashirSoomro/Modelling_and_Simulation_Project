@@ -3,9 +3,10 @@ import math
 import pandas as pd
 import random
 import numpy as np
+import streamlit as st
 from scipy.stats import norm
 import matplotlib.pyplot as plt
-
+st.title("Simulation of M/M/C")
 #Graph plot Section
 def GanttChart(Servers):
     for key, value in Servers.items():
@@ -23,7 +24,8 @@ def GanttChart(Servers):
         plt.xlabel('Time')
         plt.ylabel('Customer ID')
         plt.title('Gantt Chart for Server '+f"{key}")
-        plt.show()
+        #plt.show()
+        st.pyplot()
 
 def entVsWT(s_no,WT):
     plt.bar(s_no, WT, align='center', alpha=0.7)
@@ -32,7 +34,8 @@ def entVsWT(s_no,WT):
     plt.title('Wait Time in Queue for Each Customer')
     plt.xticks(s_no)
     plt.tight_layout()
-    plt.show()
+    #plt.show()
+    st.pyplot()
 
 def entVsTA(s_no,TA):
     plt.bar(s_no, TA, align='center', alpha=0.7)
@@ -41,8 +44,8 @@ def entVsTA(s_no,TA):
     plt.title('Turn Around Time in Queue for Each Customer')
     plt.xticks(s_no)
     plt.tight_layout()
-    plt.show()
-    
+    #plt.show()
+    st.pyplot()    
 
 def entVsArrival(s_no,arrival):
     plt.bar(s_no, arrival, align='center', alpha=0.7)
@@ -51,8 +54,9 @@ def entVsArrival(s_no,arrival):
     plt.title('Arrival Time in Queue for Each Customer')
     plt.xticks(s_no)
     plt.tight_layout()
-    plt.show()
-
+    #plt.show()
+    st.pyplot()
+    
 def entVsService(s_no,service):
     plt.bar(s_no, service, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -60,9 +64,9 @@ def entVsService(s_no,service):
     plt.title('Service Time in Queue for Each Customer')
     plt.xticks(s_no)
     plt.tight_layout()
-    plt.show()
-    return s_no,service
-
+    #plt.show()
+    st.pyplot()
+    
 def ServerUtilization(server_info):
     for i in range(len(server_info)):
         idleTime=server_info[i][0]/server_info[i][1]
@@ -72,7 +76,17 @@ def ServerUtilization(server_info):
 
         plt.pie(y, labels = mylabels,autopct='%1.1f%%')
         plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
-        plt.show() 
+        #plt.show()
+        st.pyplot()
+        
+def avg_values(int_arrival,cp,service,TA,WT,RT):
+    #Avg values of the time given
+    avg_interarrival=(np.sum(int_arrival))/len(cp)
+    avg_service=(np.sum(service))/len(cp)
+    avg_TA=(np.sum(TA))/len(cp)
+    avg_WT=(np.sum(WT))/len(cp)
+    avg_RT=(np.sum(RT))/len(cp)
+    print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT)
 
 def MMC(lembda,meu,server_no):
     #initializing required lists
@@ -184,13 +198,6 @@ def MMC(lembda,meu,server_no):
         TA.append(E[i]-arrival[i])
         WT.append(TA[i]-service[i])
         RT.append(S[i]-arrival[i])
-
-    #Avg values of the time given
-    avg_interarrival=(np.sum(int_arrival))/len(cp)
-    avg_service=(np.sum(service))/len(cp)
-    avg_TA=(np.sum(TA))/len(cp)
-    avg_WT=(np.sum(WT))/len(cp)
-    avg_RT=(np.sum(RT))/len(cp)
     
     #printing simulation table and generating list for gantt chart
     result=[cp,cpl,int_arrival,arrival,service,S,E,cust_serv_no,TA,WT,RT]
@@ -203,8 +210,8 @@ def MMC(lembda,meu,server_no):
         for nested in value:
             print(" ",nested)
     
-    return print(df),print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT),GanttChart(Servers),entVsService(s_no,service),entVsArrival(s_no,arrival),entVsTA(s_no,TA),entVsWT(s_no,WT),ServerUtilization(server_info)        
+    return df,int_arrival,cp,service,TA,WT,RT,Servers,s_no,arrival,server_info
 
-#testing
-MMC(1.58,2.5,10)
+##testing
+#MMC(1.58,2.5,10)
                 
