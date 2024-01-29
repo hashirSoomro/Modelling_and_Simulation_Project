@@ -6,6 +6,7 @@ import numpy as np
 from scipy.stats import gengamma
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+import streamlit as st
 
 #Graph plot Section
 def GanttChart(Servers):
@@ -218,4 +219,3 @@ def GGC(meu,a,d,p,sigma,server_no): # a=Shape parameter of distribution, d=Scale
 
 ###testing
 ##GGC(1.58,2.5,1.0,0.8,5,10)
-                

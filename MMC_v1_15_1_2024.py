@@ -3,6 +3,7 @@ import math
 import pandas as pd
 import random
 import numpy as np
+import streamlit as st
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
@@ -44,8 +45,8 @@ def entVsTA(s_no,TA):
     plt.xticks(s_no)
     plt.tight_layout()
     #plt.show()
-    st.pyplot()
-    
+    st.pyplot()    
+
 def entVsArrival(s_no,arrival):
     plt.bar(s_no, arrival, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -55,7 +56,7 @@ def entVsArrival(s_no,arrival):
     plt.tight_layout()
     #plt.show()
     st.pyplot()
-
+    
 def entVsService(s_no,service):
     plt.bar(s_no, service, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -65,7 +66,7 @@ def entVsService(s_no,service):
     plt.tight_layout()
     #plt.show()
     st.pyplot()
-
+    
 def ServerUtilization(server_info):
     for i in range(len(server_info)):
         idleTime=server_info[i][0]/server_info[i][1]
@@ -77,17 +78,18 @@ def ServerUtilization(server_info):
         plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
         #plt.show()
         st.pyplot()
-
+        
 def avg_values(int_arrival,cp,service,TA,WT,RT):
     #Avg values of the time given
-    avg_interarrival=(np.sum(int_arrival))/len(cp)
-    avg_service=(np.sum(service))/len(cp)
-    avg_TA=(np.sum(TA))/len(cp)
-    avg_WT=(np.sum(WT))/len(cp)
-    avg_RT=(np.sum(RT))/len(cp)
-    print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT)
+    avg_interarrival="Average Inter-Arrival Time="+f"{(np.sum(int_arrival))/len(cp)}"
+    avg_service="Average Service Time="+f"{(np.sum(service))/len(cp)}"
+    avg_TA="Average Turn-Around Time="+f"{(np.sum(TA))/len(cp)}"
+    avg_WT="Average Wait Time="+f"{(np.sum(WT))/len(cp)}"
+    avg_RT="Average Response Time="+f"{(np.sum(RT))/len(cp)}"
+    #avg_info="Average Inter-Arrival Time="+f"{avg_interarrival}"+"Average Service Time="+f"{avg_service}"+"Average Turn-Around Time="+f"{avg_TA}"+"Average Wait Time="+f"{avg_WT}"+"\nAverage Response Time="+f"{avg_RT}"
+    return avg_interarrival,avg_service,avg_TA,avg_WT,avg_RT
 
-def GMC(lembda,meu,sigma,server_no):
+def MMC(lembda,meu,server_no):
     #initializing required lists
     s_no=[]
     cp=[]
@@ -108,9 +110,8 @@ def GMC(lembda,meu,sigma,server_no):
     #Generating values for serial number, cummulative probability and cummulative probability lookup
     x=0
     while cpl[-1]<1:
-    #for x in range(0,ran_no):
         s_no.append(x)
-        value=norm.cdf(x, meu, sigma)
+        value=value+(((math.exp(-lembda))*lembda**x)/math.factorial(x))
         cp.append(float("%.6f"%value))
         cpl.append(cp[-1])
         x+=1
@@ -141,7 +142,7 @@ def GMC(lembda,meu,sigma,server_no):
     Servers={}
     for i in range(1,server_no+1):
         Servers[i]=[[0],[0],[]]
-
+    
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
@@ -169,7 +170,6 @@ def GMC(lembda,meu,sigma,server_no):
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
-
     all_last_end=[]
     for key, value in Servers.items():
         value[0].pop(0)
@@ -193,7 +193,7 @@ def GMC(lembda,meu,sigma,server_no):
                     idle_now=value[0][i+1]-value[1][i]
                     idle_time=idle_time+idle_now
             server_info.append([idle_time,max_end,key])
-
+    
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
@@ -210,9 +210,9 @@ def GMC(lembda,meu,sigma,server_no):
         print(f"Server: {key}")
         for nested in value:
             print(" ",nested)
-    
+    print(df)
     return df,int_arrival,cp,service,TA,WT,RT,Servers,s_no,arrival,server_info
 
-###testing
-##GMC(1.58,0.9,0.4,10)
+##testing
+#MMC(1.58,2.5,10)
                 

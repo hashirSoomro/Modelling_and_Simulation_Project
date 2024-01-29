@@ -3,10 +3,10 @@ import math
 import pandas as pd
 import random
 import numpy as np
-import streamlit as st
-from scipy.stats import norm
+from scipy.stats import gengamma
 import matplotlib.pyplot as plt
-st.title("Simulation of M/M/C")
+import streamlit as st
+
 #Graph plot Section
 def GanttChart(Servers):
     for key, value in Servers.items():
@@ -45,7 +45,7 @@ def entVsTA(s_no,TA):
     plt.xticks(s_no)
     plt.tight_layout()
     #plt.show()
-    st.pyplot()    
+    st.pyplot()
 
 def entVsArrival(s_no,arrival):
     plt.bar(s_no, arrival, align='center', alpha=0.7)
@@ -56,7 +56,7 @@ def entVsArrival(s_no,arrival):
     plt.tight_layout()
     #plt.show()
     st.pyplot()
-    
+
 def entVsService(s_no,service):
     plt.bar(s_no, service, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -66,7 +66,7 @@ def entVsService(s_no,service):
     plt.tight_layout()
     #plt.show()
     st.pyplot()
-    
+
 def ServerUtilization(server_info):
     for i in range(len(server_info)):
         idleTime=server_info[i][0]/server_info[i][1]
@@ -88,7 +88,7 @@ def avg_values(int_arrival,cp,service,TA,WT,RT):
     avg_RT=(np.sum(RT))/len(cp)
     print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT)
 
-def MMC(lembda,meu,server_no):
+def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale parameter of distribution, p=Shape-scaling parameter of distribution
     #initializing required lists
     s_no=[]
     cp=[]
@@ -132,8 +132,9 @@ def MMC(lembda,meu,server_no):
     int_arrival.pop(-1)
 
     #Generating values for service time
-    for i in range(len(cp)):
-        service.append(math.ceil(-meu*math.log(random.uniform(0,1))))
+    service_gamma = gengamma.rvs(a, d, scale=p, size=len(cp))
+    for i in range(len(service_gamma)):
+        service.append(math.ceil(service_gamma[i]))
 
     #Initializing Servers
     S=[]
@@ -156,8 +157,10 @@ def MMC(lembda,meu,server_no):
                 break
             all_curr_end_time.append(value[1][-1])
             min_end=min(all_curr_end_time)
+            #print(min_end)
             
         all_curr_end_time.clear()
+        #print(min_end)
         if i>C_count:
             C_count=C_count+1
             for key, value in Servers.items():
@@ -169,6 +172,7 @@ def MMC(lembda,meu,server_no):
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
+    
     all_last_end=[]
     for key, value in Servers.items():
         value[0].pop(0)
@@ -178,7 +182,7 @@ def MMC(lembda,meu,server_no):
         else:
             all_last_end.append(value[1][-1])
     max_end=max(all_last_end)
-
+    
     #Server Utilization    
     for key,value in Servers.items():
         if value[0] == []:
@@ -192,7 +196,7 @@ def MMC(lembda,meu,server_no):
                     idle_now=value[0][i+1]-value[1][i]
                     idle_time=idle_time+idle_now
             server_info.append([idle_time,max_end,key])
-    
+
     #Generating values for TurnAround time,Wait time and Response Time
     for i in range(len(cp)):
         TA.append(E[i]-arrival[i])
@@ -212,6 +216,5 @@ def MMC(lembda,meu,server_no):
     
     return df,int_arrival,cp,service,TA,WT,RT,Servers,s_no,arrival,server_info
 
-##testing
-#MMC(1.58,2.5,10)
-                
+###testing
+##MGC(1.58,2.5,1.0,0.8,10)

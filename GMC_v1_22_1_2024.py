@@ -3,8 +3,9 @@ import math
 import pandas as pd
 import random
 import numpy as np
-from scipy.stats import gengamma
+from scipy.stats import norm
 import matplotlib.pyplot as plt
+import streamlit as st
 
 #Graph plot Section
 def GanttChart(Servers):
@@ -45,7 +46,7 @@ def entVsTA(s_no,TA):
     plt.tight_layout()
     #plt.show()
     st.pyplot()
-
+    
 def entVsArrival(s_no,arrival):
     plt.bar(s_no, arrival, align='center', alpha=0.7)
     plt.xlabel('Customers')
@@ -77,7 +78,7 @@ def ServerUtilization(server_info):
         plt.title("Server Utilization for Server "+f"{server_info[i][2]}")
         #plt.show()
         st.pyplot()
-        
+
 def avg_values(int_arrival,cp,service,TA,WT,RT):
     #Avg values of the time given
     avg_interarrival=(np.sum(int_arrival))/len(cp)
@@ -87,7 +88,7 @@ def avg_values(int_arrival,cp,service,TA,WT,RT):
     avg_RT=(np.sum(RT))/len(cp)
     print("Average Inter-Arrival Time=",avg_interarrival,"\nAverage Service Time=",avg_service,"\nAverage Turn-Around Time=",avg_TA,"\nAverage Wait Time=",avg_WT,"\nAverage Response Time=",avg_RT)
 
-def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale parameter of distribution, p=Shape-scaling parameter of distribution
+def GMC(lembda,meu,sigma,server_no):
     #initializing required lists
     s_no=[]
     cp=[]
@@ -108,8 +109,9 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
     #Generating values for serial number, cummulative probability and cummulative probability lookup
     x=0
     while cpl[-1]<1:
+    #for x in range(0,ran_no):
         s_no.append(x)
-        value=value+(((math.exp(-lembda))*lembda**x)/math.factorial(x))
+        value=norm.cdf(x, meu, sigma)
         cp.append(float("%.6f"%value))
         cpl.append(cp[-1])
         x+=1
@@ -131,9 +133,8 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
     int_arrival.pop(-1)
 
     #Generating values for service time
-    service_gamma = gengamma.rvs(a, d, scale=p, size=len(cp))
-    for i in range(len(service_gamma)):
-        service.append(math.ceil(service_gamma[i]))
+    for i in range(len(cp)):
+        service.append(math.ceil(-meu*math.log(random.uniform(0,1))))
 
     #Initializing Servers
     S=[]
@@ -141,7 +142,7 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
     Servers={}
     for i in range(1,server_no+1):
         Servers[i]=[[0],[0],[]]
-    
+
     #Assigning customers to server
     for i in range(len(arrival)):
         for key, value in Servers.items():
@@ -156,10 +157,8 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
                 break
             all_curr_end_time.append(value[1][-1])
             min_end=min(all_curr_end_time)
-            #print(min_end)
             
         all_curr_end_time.clear()
-        #print(min_end)
         if i>C_count:
             C_count=C_count+1
             for key, value in Servers.items():
@@ -171,7 +170,7 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
                     value[1].append(min_end+service[i])
                     E.append(min_end+service[i])
                     break
-    
+
     all_last_end=[]
     for key, value in Servers.items():
         value[0].pop(0)
@@ -181,7 +180,7 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
         else:
             all_last_end.append(value[1][-1])
     max_end=max(all_last_end)
-    
+
     #Server Utilization    
     for key,value in Servers.items():
         if value[0] == []:
@@ -216,4 +215,5 @@ def MGC(lembda,a,d,p,server_no): # a=Shape parameter of distribution, d=Scale pa
     return df,int_arrival,cp,service,TA,WT,RT,Servers,s_no,arrival,server_info
 
 ###testing
-##MGC(1.58,2.5,1.0,0.8,10)
+##GMC(1.58,0.9,0.4,10)
+                
