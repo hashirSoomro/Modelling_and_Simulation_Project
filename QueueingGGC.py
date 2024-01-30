@@ -5,6 +5,7 @@ def GGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ArrivalVariance,ServiceV
     meu=1/Service_Mean
     c=No_of_server
     p=lembda/(c*meu)
+    idle=1-p
     Ca=ArrivalVariance/((1/lembda)**2)
     Cs=ServiceVariance/((1/meu)**2)
     value=0
@@ -17,4 +18,4 @@ def GGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ArrivalVariance,ServiceV
     Lq=lembda*Wq
     Ws=Wq+(1/meu)
     Ls=Ws*lembda
-    return Lq,Wq,Ws,Ls,Pnot
+    return Lq,Wq,Ws,Ls,idle
