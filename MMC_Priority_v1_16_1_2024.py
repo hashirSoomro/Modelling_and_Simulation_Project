@@ -112,6 +112,14 @@ def MMC_Priority(lembda,meu,server_no):
     global min_priority
     global service_remain
     service_remain=0
+    a=1             #Lower limit for priority
+    b=3             #Upper Limit for priority
+    A=55            #Required constant for priority
+    M=1994          #Required constant for priority
+    Z=[10112166]    #Required seed value initiated in list for priority
+    R=[]
+    r=0
+    C=9             #Required constant for priority
     
     #Generating values for serial number, cummulative probability and cummulative probability lookup
     x=0
@@ -123,10 +131,10 @@ def MMC_Priority(lembda,meu,server_no):
         x+=1
     cpl.pop(-1)
 
-    #Generating priority
-    for i in range(len(cp)):
-        ran_prior=random.randint(1,3)
-        priority.append(ran_prior)
+##    #Generating priority
+##    for i in range(len(cp)):
+##        ran_prior=random.randint(1,3)
+##        priority.append(ran_prior)
 
     #Generating values for inter-arrival time 
     for i in range(len(cp)):
@@ -146,6 +154,16 @@ def MMC_Priority(lembda,meu,server_no):
     #Generating values for service time
     for i in range(len(cp)):
         service.append(math.ceil(-meu*math.log(random.uniform(0,1))))
+
+    #For Priority
+    for i in range(len(cp)):
+        r=(A* (Z[i])+C)%M
+        R.append(r)
+        Z.append(r)
+        Priority=round((((b-a)*R[i])/M)+a)
+        priority.append(Priority)
+    Z.pop()
+    i=0
 
     #Initializing Servers
     S=[]

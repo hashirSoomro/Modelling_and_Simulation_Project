@@ -12,7 +12,7 @@ def main():
     st.title('Simulation Project')
 
      # Create a sidebar for navigation
-    page = st.sidebar.selectbox('Select Function', ['MMC', 'MGC', 'GMC', 'GGC', 'MMC with Priority','MMC Queueing','MGC Queueing','GGC Queueing'])
+    page = st.sidebar.selectbox('Select Function', ['MMC', 'MGC', 'GMC', 'GGC', 'MMC with Priority'])
 
     if page == 'MMC':
         st.subheader('M/M/C Simulation')
@@ -167,53 +167,53 @@ def main():
             entVsService(s_no,service)
             ServerUtilization(server_info)
 
-    elif page == 'MMC Queueing':
-        st.subheader('M/M/C Queuing')
-        # Take user inputs for MMC Queueing
-        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
-
-        if st.button('Run M/M/C Queuing'):
-            Lq,Wq,Ws,Ls,Pnot=MMC_Queueing(Arrival_Mean,Service_Mean,No_of_server)
-            st.write("Wait in Queue (Wq):",Wq)
-            st.write("Wait in System (Ws):",Ws)
-            st.write("Probability of Server (P):",Pnot)
-            st.write("Length of Queue (Lq):",Lq)
-            st.write("Length of System (Ls):",Ls)
-
-    elif page == 'MGC Queueing':
-        st.subheader('M/G/C Queuing')
-        # Take user inputs for MMC Queueing
-        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
-        ServiceVariance=st.number_input('Service variance', min_value=0.01, step=0.01, format='%f', value=1.0)
-
-        if st.button('Run M/G/C Queuing'):
-            Lq,Wq,Ws,Ls,Pnot=MGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ServiceVariance)
-            st.write("Wait in Queue (Wq):",Wq)
-            st.write("Wait in System (Ws):",Ws)
-            st.write("Probability of Server (P):",Pnot)
-            st.write("Length of Queue (Lq):",Lq)
-            st.write("Length of System (Ls):",Ls)
-
-    elif page == 'GGC Queueing':
-        st.subheader('G/G/C Queuing')
-        # Take user inputs for MMC Queueing
-        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
-        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
-        ArrivalVariance=st.number_input('Arrival Variance', min_value=0.01, step=0.01, format='%f', value=1.0)
-        ServiceVariance=st.number_input('Service variance', min_value=0.01, step=0.01, format='%f', value=1.0)
-
-        if st.button('Run G/G/C Queuing'):
-            Lq,Wq,Ws,Ls,Pnot=GGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ArrivalVariance,ServiceVariance)
-            st.write("Wait in Queue (Wq):",Wq)
-            st.write("Wait in System (Ws):",Ws)
-            st.write("Probability of Server (P):",Pnot)
-            st.write("Length of Queue (Lq):",Lq)
-            st.write("Length of System (Ls):",Ls)    
+##    elif page == 'MMC Queueing':
+##        st.subheader('M/M/C Queuing')
+##        # Take user inputs for MMC Queueing
+##        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
+##
+##        if st.button('Run M/M/C Queuing'):
+##            Lq,Wq,Ws,Ls,Pnot=MMC_Queueing(Arrival_Mean,Service_Mean,No_of_server)
+##            st.write("Wait in Queue (Wq):",Wq)
+##            st.write("Wait in System (Ws):",Ws)
+##            st.write("Probability of Server (P):",Pnot)
+##            st.write("Length of Queue (Lq):",Lq)
+##            st.write("Length of System (Ls):",Ls)
+##
+##    elif page == 'MGC Queueing':
+##        st.subheader('M/G/C Queuing')
+##        # Take user inputs for MMC Queueing
+##        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
+##        ServiceVariance=st.number_input('Service variance', min_value=0.01, step=0.01, format='%f', value=1.0)
+##
+##        if st.button('Run M/G/C Queuing'):
+##            Lq,Wq,Ws,Ls,Pnot=MGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ServiceVariance)
+##            st.write("Wait in Queue (Wq):",Wq)
+##            st.write("Wait in System (Ws):",Ws)
+##            st.write("Probability of Server (P):",Pnot)
+##            st.write("Length of Queue (Lq):",Lq)
+##            st.write("Length of System (Ls):",Ls)
+##
+##    elif page == 'GGC Queueing':
+##        st.subheader('G/G/C Queuing')
+##        # Take user inputs for MMC Queueing
+##        Arrival_Mean=st.number_input('Mean Arrival Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        Service_Mean=st.number_input('Mean Service Rate:', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        No_of_server=st.number_input('Enter Number of Servers:', min_value=1, step=1, value=1)
+##        ArrivalVariance=st.number_input('Arrival Variance', min_value=0.01, step=0.01, format='%f', value=1.0)
+##        ServiceVariance=st.number_input('Service variance', min_value=0.01, step=0.01, format='%f', value=1.0)
+##
+##        if st.button('Run G/G/C Queuing'):
+##            Lq,Wq,Ws,Ls,Pnot=GGC_Queueing(Arrival_Mean,Service_Mean,No_of_server,ArrivalVariance,ServiceVariance)
+##            st.write("Wait in Queue (Wq):",Wq)
+##            st.write("Wait in System (Ws):",Ws)
+##            st.write("Probability of Server (P):",Pnot)
+##            st.write("Length of Queue (Lq):",Lq)
+##            st.write("Length of System (Ls):",Ls)    
 
     
 if __name__ == '__main__':
