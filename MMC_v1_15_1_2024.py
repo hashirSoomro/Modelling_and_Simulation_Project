@@ -19,7 +19,8 @@ def GanttChart(Servers):
         if value[1]==[]:
             plt.xticks(range(0, 10))
         else:
-            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+            max_cust_time=max(value[1]) + 1
+            plt.xticks(range(0, max_cust_time,math.ceil(max_cust_time/10)))  # Set x-axis ticks to integers
         plt.yticks(value[2])  # Set y-axis ticks to customer IDs
         plt.xlabel('Time')
         plt.ylabel('Customer ID')
@@ -204,6 +205,7 @@ def MMC(lembda,meu,server_no):
     result=[cp,cpl,int_arrival,arrival,service,S,E,cust_serv_no,TA,WT,RT]
     df=pd.DataFrame(result,index=["CP","CPL","Inter-arrival","Arrival","Service","Start","End","Server No","TurnAround","WaitTime","ResponseTime"])
     df=df.transpose()
+    df.index = df.index + 1
     pd.set_option('display.max_columns', None)
 
     for key, value in Servers.items():

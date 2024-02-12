@@ -10,16 +10,20 @@ import streamlit as st
 #Graph plot Section
 def GanttChart_Priority(Servers):
     for key, value in Servers.items():
+        # Define custom colors based on conditions
+        colors = ['green' if v == 1 else 'yellow' if v == 2 else 'red' for v in value[2]]
+
         # Create a Gantt chart using Matplotlib
         fig, ax = plt.subplots()
-        for i, customer in enumerate(value[4]):
-            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, label=f'Customer {customer}')
+        for i, (customer, color) in enumerate(zip(value[4], colors)):
+            ax.barh(customer, width=value[1][i] - value[0][i], left=value[0][i], height=0.5, color=color, label=f'Customer {customer}')
 
         # Beautify the plot
         if value[1]==[]:
             plt.xticks(range(0, 10))
         else:
-            plt.xticks(range(0, max(value[1]) + 1))  # Set x-axis ticks to integers
+            max_cust_time=max(value[1]) + 1
+            plt.xticks(range(0, max_cust_time,math.ceil(max_cust_time/10)))  # Set x-axis ticks to integers
         plt.yticks(value[4])  # Set y-axis ticks to customer IDs
         plt.xlabel('Time')
         plt.ylabel('Customer ID')
@@ -389,9 +393,11 @@ def MMC_Priority(lembda,meu,server_no):
     result=[cp,cpl,int_arrival,arrival,service,S,E,cust_serv_no,priority,TA,WT,RT]
     df=pd.DataFrame(result,index=["CP","CPL","Inter-arrival","Arrival","Service","Start","End","Server No","Priority","TurnAround","WaitTime","ResponseTime"])
     df=df.transpose()
+    df.index = df.index + 1
     pd.set_option('display.max_columns', None)
 
     for key, value in Servers.items():
+        value[4] = [x + 1 for x in value[4]]
         print(f"Server: {key}")
         for nested in value:
             print(" ",nested)

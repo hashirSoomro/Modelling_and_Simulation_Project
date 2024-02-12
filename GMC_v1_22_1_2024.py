@@ -205,6 +205,7 @@ def GMC(lembda,meu,sigma,server_no):
     result=[cp,cpl,int_arrival,arrival,service,S,E,cust_serv_no,TA,WT,RT]
     df=pd.DataFrame(result,index=["CP","CPL","Inter-arrival","Arrival","Service","Start","End","Server No","TurnAround","WaitTime","ResponseTime"])
     df=df.transpose()
+    df.index = df.index + 1
     pd.set_option('display.max_columns', None)
 
     for key, value in Servers.items():
